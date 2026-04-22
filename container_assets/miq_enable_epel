@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+dnf -y install epel-release
+/usr/bin/crb enable

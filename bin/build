@@ -1,0 +1,31 @@
+#!/bin/bash
+
+while getopts "t:r:hp" opt; do
+  case $opt in
+    p) PUSH="true" ;;
+    r) REPO=$OPTARG ;;
+    t) TAG=$OPTARG ;;
+    h) echo "Usage: $0 [-hp] [-r IMAGE_REPOSITORY] [-t IMAGE_TAG]"; exit 1
+  esac
+done
+
+REPO=${REPO:-quay.io/manageiq}
+TAG=${TAG:-v1}
+
+CONTAINER_COMMAND="$(which podman &>/dev/null && echo "podman" || echo "docker")"
+
+set -e
+
+$CONTAINER_COMMAND build . --format docker -t $REPO/build_tools:$TAG
+
+if [ -n "$PUSH" ]; then
+  cmd="$CONTAINER_COMMAND push $REPO/build_tools:$TAG"
+
+  # --format docker is needed for podman to ensure the builds are built with docker v2 manifests
+  if [ "$CONTAINER_COMMAND" == "podman" ]; then
+    cmd+=" --format docker"
+  fi
+
+  echo "Pushing $image: $cmd"
+  $cmd
+fi

@@ -1,0 +1,22 @@
+name: Build
+on:
+  push:
+    branches-ignore:
+    - dependabot/*
+    - renovate/*
+  workflow_dispatch:
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  build:
+    if: github.repository_owner == 'ManageIQ' && startsWith(github.ref, 'refs/heads/v')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Registry login
+      run: echo ${{ secrets.QUAY_REGISTRY_PASSWORD }} | docker login quay.io --password-stdin --username ${{ secrets.QUAY_REGISTRY_USERNAME }}
+    - name: Build and push container
+      run: bin/build -p
