@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+ARCH=$(uname -m)
+
+sed -i "s/enabled=1/enabled=0/g" /etc/dnf/plugins/subscription-manager.conf && \
+
+dnf -y install \
+  http://mirror.stream.centos.org/10-stream/BaseOS/${ARCH}/os/Packages/centos-stream-repos-10.0-21.el10.noarch.rpm \
+  http://mirror.stream.centos.org/10-stream/BaseOS/${ARCH}/os/Packages/centos-gpg-keys-10.0-21.el10.noarch.rpm
+
+dnf -y --setopt=protected_packages= swap redhat-release centos-stream-release
